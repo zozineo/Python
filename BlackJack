@@ -1,0 +1,183 @@
+"""
+Projeto 2: Criar um BlackJack
+
+def vitória(): condição de vitória;
+deve ser um comando
+
+class Jogadas(object): interface para pedir as jogadas e retornar as funções
+equivalentes
+
+função para receber cartas de um baralho:
+
+def receber_cartas():
+    global mão_do_jogador
+    global baralho
+    for num in (random.choices(range(53),k=num_cartas_inicial)):
+        cs=baralho.pop(num)
+        mão_do_jogador.append(cs)
+    print('\n Essa é a sua mão_do_jogador:', mão_do_jogador)
+
+"""
+import random
+
+baralho=[]
+mão_do_jogador=[]
+mão_do_dealer=[]
+dinheiro=250
+instruções='\n Essas são as jogadas possíveis: \n (1): Hit (pegar uma carta do baralho) \n (2): Stand (permanecer com sua mão atual) \n (3): Double Down (compra mais uma carta e dobra sua aposta) \n (4): Forfeit (desistir da aposta)'
+
+
+#funções de inicialização
+    
+def iniciar():
+    global num_cartas_inicial
+    global nome_do_jogador
+    global num_cartas_dealer
+    global dinheiro
+    global aposta
+    num_cartas_inicial = int(input('\n Com quantas cartas quer começar?'))
+    if num_cartas_inicial > 10 or num_cartas_inicial < 5:
+        print('\n Atenção! Escolha um número entre 5 e 10')
+        iniciar()
+    else:
+        nome_do_jogador = str(input('\n Como você se chama?'))
+        if type(nome_do_jogador) != str:
+            print('\n Algo deu errado! Tenha certeza que colocou um número ou um nome'+
+                  ' válidos!')
+            iniciar()
+        else:
+            num_cartas_dealer=int(input('\n Com quantas cartas quer que o Dealer começe?'))
+            if num_cartas_dealer > 5:
+                print('\n O dealer não pode ter mais de 5 cartas :\\')
+                iniciar()
+            else:
+                print('\n Você tem esse dinheiro disponível: R$', dinheiro)
+                aposta = int(input('\n Qual será sua aposta inicial? \n R$:'))
+                dinheiro-=aposta
+                if aposta > dinheiro:
+                    print('Você não tem tanto dinheiro assim...'
+                          '\n Esse é seu dinheiro:', dinheiro)
+                    iniciar()
+                else:
+                    print('\n Tudo certo! Bem-vindo ao BlackJack,', nome_do_jogador)
+    
+
+def carta(número,naipe):
+    números=['Ás', 'Dois', 'Três', 'Quatro', 'Cinco', 'Seis', 'Sete',
+             'Oito', 'Nove', 'Dez', 'Valete', 'Dama', 'Rei']
+    naipes=['de Ouros', 'de Espadas', 'de Copas', 'de Paus']
+    return '%s %s' %(números[número],naipes[naipe])   
+
+class Baralho(object):
+    
+    def __init__(self):
+        global baralho
+        for num in range(13):
+            for naipe in range(4):
+                c=carta(num,naipe)
+                baralho.append(c)
+        
+    def __str__(self):
+        res=[]
+        for carta in baralho:
+            res.append(str(carta))  #str() retorna o valor em forma de string
+        return '\n'.join(res)
+
+
+##funções do Dealer
+
+class Dealer(object):
+    
+    def __init__(self):
+        global mão_do_dealer
+        global baralho
+        global dinheiro
+        global aposta
+        rd=(random.choices(range(len(baralho)),k=num_cartas_dealer))
+        rd.sort(reverse=True)
+        for num in rd:
+            cd=baralho.pop(num)
+            mão_do_dealer.append(cd)
+        rj=(random.choices(range(len(baralho)),k=num_cartas_inicial))
+        rj.sort(reverse=True)
+        for num in rj:
+            cs=baralho.pop(num)
+            mão_do_jogador.append(cs)
+        print('\n Dealer: Olá,', nome_do_jogador,'\n'
+              '\n Essa é minha mão:', mão_do_dealer, '\n'
+              '\n \n (Sua mão:)', mão_do_jogador, '\n')
+        
+
+# funções de jogadas possíveis:
+
+def credito_e_aposta():
+    global dinheiro
+    global aposta
+    print('\n (Você tem R$', dinheiro, 'restante.)')
+    print('\n (Essa é a aposta que está na mesa:)', aposta)
+    
+def dealer_compra1():
+    global mão_do_dealer
+    global baralho
+    for num in random.choices((range(len(baralho)+1)),k=1):
+        ccd=baralho.pop(num)
+        mão_do_dealer.append(ccd)
+    print('Mão do Dealer:', mão_do_dealer)
+
+def hit():
+    global mão_do_jogador
+    global baralho
+    for num in random.choices((range(len(baralho)+1)),k=1):
+        cc=baralho.pop(num)
+        mão_do_jogador.append(cc)
+    print('\n \n (Sua mão:) \n', mão_do_jogador, '\n')
+    dealer_compra1()
+    credito_e_aposta()
+    
+def stand():
+    dealer_compra1()
+    credito_e_aposta()
+    
+def double_down():
+    global aposta
+    global dinheiro
+    if aposta * 2 <= dinheiro:
+        aposta*=2
+        hit()
+        credito_e_aposta()
+    else:
+        print('Você não tem dinheiro suficiente. Escolha outra jogada.')
+
+def forfeit():
+    global dinheiro
+    global aposta
+    dinheiro += aposta/2
+    aposta = 0
+    print ('\n (Você desistiu dessa rodada! Metade da aposta da mesa voltou para seu dinheiro.)')
+    
+class Jogadas(object):
+    
+    def __init__(self):
+        global mão_do_jogador
+        global baralho
+        global mão_do_dealer
+        print(instruções)
+        co=str(input('\n (Indique a sua jogada, escreva somente o número e dê enter:) \n'))
+        if co == '1':
+            hit()
+        elif co == '2':
+            stand()
+        elif co == '3':
+            double_down()
+        elif co == '4':
+            res=str(input('\n (Você tem certeza que quer desistir dessa mão? \n Responda apenas com "s" ou "n")'))
+            if res == 's':
+                forfeit()
+        else:
+            print('\n (Coloque um comando válido!)', instruções)
+    
+
+iniciar()
+baralho1=Baralho()
+dealer=Dealer()
+jogadas=Jogadas()
