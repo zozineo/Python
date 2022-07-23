@@ -1,0 +1,27 @@
+#You can play using the commands "posic_x" and "posic_o" to choose where you want to put the x and the o.
+
+mapa = '_1_|_2_|_3_ \n_4_|_5_|_6_ \n_7_|_8_|_9_'
+verificação={1:1,2:5,3:9,4:14,5:18,6:22,7:27,8:31,9:35}
+
+def tabuleiro():
+    global mapa
+    print(mapa, '\n')
+    
+def vitória():
+    global mapa
+    if mapa[1]==mapa[5]==mapa[9] or mapa[14]==mapa[18]==mapa[22] or mapa[27]==mapa[31]==mapa[35] or mapa[1]==mapa[14]==mapa[27] or mapa[5]==mapa[18]==mapa[31] or mapa[9]==mapa[22]==mapa[35] or mapa[1]==mapa[18]==mapa[25] or mapa[9]==mapa[18]==mapa[27]:
+        print ('Vitória!!')
+        
+def posic_x(p):
+    global mapa
+    num=verificação[p]
+    mapa=(mapa.replace(mapa[num],"X",1))
+    tabuleiro()
+    vitória()
+    
+def posic_o(p):
+    global mapa
+    num=verificação[p]
+    mapa=(mapa.replace(mapa[num],"O",1))
+    tabuleiro()
+    vitória()
