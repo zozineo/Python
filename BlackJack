@@ -1,77 +1,59 @@
 """
 Projeto 2: Criar um BlackJack
-
-def vitória(): condição de vitória;
-deve ser um comando
-
-class Jogadas(object): interface para pedir as jogadas e retornar as funções
-equivalentes
-
-função para receber cartas de um baralho:
-
-def receber_cartas():
-    global mão_do_jogador
-    global baralho
-    for num in (random.choices(range(53),k=num_cartas_inicial)):
-        cs=baralho.pop(num)
-        mão_do_jogador.append(cs)
-    print('\n Essa é a sua mão_do_jogador:', mão_do_jogador)
-
 """
 import random
+import time
 
-baralho=[]
 mão_do_jogador=[]
 mão_do_dealer=[]
 dinheiro=250
-instruções='\n Essas são as jogadas possíveis: \n (1): Hit (pegar uma carta do baralho) \n (2): Stand (permanecer com sua mão atual) \n (3): Double Down (compra mais uma carta e dobra sua aposta) \n (4): Forfeit (desistir da aposta)'
+verif=0
+l=0
+instruções='\n Essas são as jogadas possíveis: \n (1): Hit (pegar uma carta do baralho) \n (2): Stand (se estiver satisfeito com a sua mão, passe a jogada para o Dealer) \n (3): Double Down (compra mais uma carta e dobra sua aposta) \n (4): Split (divida sua mão em duas mãos diferentes, com apostas diferentes) \n (5): Forfeit (desistir da aposta)'
 
 
-#funções de inicialização
-    
-def iniciar():
-    global num_cartas_inicial
-    global nome_do_jogador
-    global num_cartas_dealer
-    global dinheiro
-    global aposta
-    num_cartas_inicial = int(input('\n Com quantas cartas quer começar?'))
-    if num_cartas_inicial > 10 or num_cartas_inicial < 5:
-        print('\n Atenção! Escolha um número entre 5 e 10')
-        iniciar()
-    else:
-        nome_do_jogador = str(input('\n Como você se chama?'))
+# funções de inicialização:
+
+class Config_iniciais(object):
+
+    def __init__ (self):
+        global nome_do_jogador
+        global dinheiro
+        global aposta
+        nome_do_jogador = str(input('\n Bem-vindo ao Blackjack!!\n'
+                                    '\n Como você se chama? \n'))
         if type(nome_do_jogador) != str:
-            print('\n Algo deu errado! Tenha certeza que colocou um número ou um nome'+
-                  ' válidos!')
-            iniciar()
-        else:
-            num_cartas_dealer=int(input('\n Com quantas cartas quer que o Dealer começe?'))
-            if num_cartas_dealer > 5:
-                print('\n O dealer não pode ter mais de 5 cartas :\\')
-                iniciar()
-            else:
-                print('\n Você tem esse dinheiro disponível: R$', dinheiro)
-                aposta = int(input('\n Qual será sua aposta inicial? \n R$:'))
-                dinheiro-=aposta
-                if aposta > dinheiro:
-                    print('Você não tem tanto dinheiro assim...'
-                          '\n Esse é seu dinheiro:', dinheiro)
-                    iniciar()
-                else:
-                    print('\n Tudo certo! Bem-vindo ao BlackJack,', nome_do_jogador)
-    
+            print('\n Algo deu errado! Tenha certeza que colocou um nome válido!!')
+            ci.__init__()
 
-def carta(número,naipe):
-    números=['Ás', 'Dois', 'Três', 'Quatro', 'Cinco', 'Seis', 'Sete',
-             'Oito', 'Nove', 'Dez', 'Valete', 'Dama', 'Rei']
-    naipes=['de Ouros', 'de Espadas', 'de Copas', 'de Paus']
+    def apostar(self):
+        global dinheiro
+        global aposta
+        print( '\n', nome_do_jogador, ', \n Você tem esse dinheiro disponível: R$', dinheiro)
+        aposta = int(input('\n Qual será sua aposta inicial? \n R$:'))
+        if aposta > dinheiro:
+            print('Você não tem tanto dinheiro assim...'
+                            '\n Esse é seu dinheiro:', dinheiro)
+            ci.aposta()
+        else:
+            dinheiro-=aposta
+            print('\n Tudo certo! Bem-vindo ao BlackJack,', nome_do_jogador)
+    
+def carta(número,naipe):         #função para gerar cartas para a classe baralho
+    global naipes
+    global números
+    global família
+    números=['Ás', '2', '3', '4', '5', '6', '7',
+             '8', '9', '10', 'Valete', 'Dama', 'Rei']
+    naipes=['♦', '♠', '♥', '♣']
+    família=['Valete', 'Dama', 'Rei']
     return '%s %s' %(números[número],naipes[naipe])   
 
 class Baralho(object):
     
     def __init__(self):
         global baralho
+        baralho=[]
         for num in range(13):
             for naipe in range(4):
                 c=carta(num,naipe)
@@ -80,104 +62,266 @@ class Baralho(object):
     def __str__(self):
         res=[]
         for carta in baralho:
-            res.append(str(carta))  #str() retorna o valor em forma de string
+            res.append(str(carta))  #str() na o valor em forma de string
         return '\n'.join(res)
-
-
-##funções do Dealer
 
 class Dealer(object):
     
     def __init__(self):
+        pass
+
+    def entregar(self):
         global mão_do_dealer
         global baralho
         global dinheiro
         global aposta
-        rd=(random.choices(range(len(baralho)),k=num_cartas_dealer))
+        global cartad_aparente
+        rd=(random.choices(range(len(baralho)),k=2))
         rd.sort(reverse=True)
         for num in rd:
             cd=baralho.pop(num)
             mão_do_dealer.append(cd)
-        rj=(random.choices(range(len(baralho)),k=num_cartas_inicial))
+        rj=(random.choices(range(len(baralho)),k=2))
         rj.sort(reverse=True)
         for num in rj:
             cs=baralho.pop(num)
             mão_do_jogador.append(cs)
+        cartad_aparente=random.choices(mão_do_dealer,k=1)
         print('\n Dealer: Olá,', nome_do_jogador,'\n'
-              '\n Essa é minha mão:', mão_do_dealer, '\n'
-              '\n \n (Sua mão:)', mão_do_jogador, '\n')
+              '\n Essa é minha mão:', cartad_aparente, '\n'
+              '\n (Sua mão:)', mão_do_jogador, '\n')
         
 
 # funções de jogadas possíveis:
 
-def credito_e_aposta():
-    global dinheiro
-    global aposta
-    print('\n (Você tem R$', dinheiro, 'restante.)')
-    print('\n (Essa é a aposta que está na mesa:)', aposta)
-    
-def dealer_compra1():
-    global mão_do_dealer
-    global baralho
-    for num in random.choices((range(len(baralho)+1)),k=1):
-        ccd=baralho.pop(num)
-        mão_do_dealer.append(ccd)
-    print('Mão do Dealer:', mão_do_dealer)
-
-def hit():
-    global mão_do_jogador
-    global baralho
-    for num in random.choices((range(len(baralho)+1)),k=1):
-        cc=baralho.pop(num)
-        mão_do_jogador.append(cc)
-    print('\n \n (Sua mão:) \n', mão_do_jogador, '\n')
-    dealer_compra1()
-    credito_e_aposta()
-    
-def stand():
-    dealer_compra1()
-    credito_e_aposta()
-    
-def double_down():
-    global aposta
-    global dinheiro
-    if aposta * 2 <= dinheiro:
-        aposta*=2
-        hit()
-        credito_e_aposta()
-    else:
-        print('Você não tem dinheiro suficiente. Escolha outra jogada.')
-
-def forfeit():
-    global dinheiro
-    global aposta
-    dinheiro += aposta/2
-    aposta = 0
-    print ('\n (Você desistiu dessa rodada! Metade da aposta da mesa voltou para seu dinheiro.)')
-    
 class Jogadas(object):
     
     def __init__(self):
-        global mão_do_jogador
-        global baralho
-        global mão_do_dealer
+        pass
+    
+    def jogador(self):
+        global mão_do_jogador, vm_dealer, baralho, verif
+        p.vmf_dealer()
         print(instruções)
-        co=str(input('\n (Indique a sua jogada, escreva somente o número e dê enter:) \n'))
-        if co == '1':
-            hit()
-        elif co == '2':
-            stand()
-        elif co == '3':
-            double_down()
-        elif co == '4':
-            res=str(input('\n (Você tem certeza que quer desistir dessa mão? \n Responda apenas com "s" ou "n")'))
+        co=int(input('\n (Indique o que quer fazer com sua mão:) \n'))
+        if type(co)!=int:
+            print('(Coloque um comando válido! Digite apenas o número e dê "Enter")')
+            j.jogador(self)
+        if co == 1:
+            j.hit()
+            c.cond1()
+            if verif == 1:
+                pass
+            else:
+                Jogadas.jogador(self)
+        elif co == 2:
+            j.stand()
+            pass
+        elif co == 3:
+            j.double_down()
+            c.cond1()
+        elif co == 4:
+            if mão_do_jogador[0][0] == mão_do_jogador[1][0]:
+                j.split()
+            else:
+                print('\n (Você só pode pedir "split" caso os dois valores na sua mão sejam iguais)')
+                j.jogada()
+        elif co == 5:
+            res=str(input('\n (Você tem certeza que quer desistir dessa mão?) \n \n (Responda apenas com "s" ou "n")'))
+            if type(res)!='s' or type(res)!='n':
+                print('\n (ATENÇÃO!! Responda apenas com "s" ou "n") \n')
+                j.jogador()
             if res == 's':
-                forfeit()
+                j.forfeit()
+            if res=='n':
+                pass
         else:
             print('\n (Coloque um comando válido!)', instruções)
+        
+    def dealer(self):
+        global mão_do_dealer, baralho, vm_dealer, verif, dinheiro, aposta
+        print('\n \n Mão do Dealer:', mão_do_dealer)
+        p.vmf_dealer()
+        while len(mão_do_dealer) < 5 and vm_dealer < 17:
+            rdc=random.choices((range(len(baralho)+1)),k=1)
+            rdc.sort(reverse=True)
+            for num in rdc:
+                p.vmf_dealer()
+                if vm_dealer<21:
+                    ccd=baralho.pop(num)
+                    mão_do_dealer.append(ccd)
+                    time.sleep(1)
+                    print('\n \n Mão do Dealer:', mão_do_dealer)
+                    p.vmf_dealer()
+                if vm_dealer>21:
+                    print('\n Você venceu! A mão do dealer passou de 21 pontos')
+                    dinheiro+=2*aposta
+                    aposta=0
+                    verif+=1
+
+    def credito_e_aposta(self):
+        global dinheiro, aposta
+        print('\n (Você tem R$', dinheiro, 'restante.)')
+        print('\n (Essa é a aposta que está na mesa: R$', aposta, ')')
+        
+    def hit(self):
+        global mão_do_jogador, baralho
+        for num in random.choices((range(len(baralho))),k=1):
+            cc=baralho.pop(num)
+            mão_do_jogador.append(cc)
+        print('\n \n (Sua mão:) \n', mão_do_jogador, '\n')
+        p.vmf_jogador()
+        j.credito_e_aposta()
+        
+    def stand(self):
+        p.vmf_jogador()
+        j.credito_e_aposta()
+        
+    def double_down(self):
+        global aposta, aposta
+        p.vmf_jogador()
+        if aposta*2 <= dinheiro:
+            dinheiro-=aposta
+            aposta*=2
+            j.hit()
+        else:
+            print('\n (Você não tem dinheiro suficiente. Escolha outra jogada.)')
+
+    def forfeit(self):
+        global dinheiro, aposta
+        dinheiro += aposta/2
+        aposta = 0
+        print ('\n (Você desistiu dessa rodada, mas recuperou metade da sua aposta.)')
+
+    def split(self):
+        global mão_do_jogador
+        global mdj1
+        global mdj2
+        global aposta
+        mdj1.append(mão_do_jogador.pop(0))
+        mdj2.append(mão_do_jogador.pop(0))
+
+
+# contadores de pontuação:
+
+class Pontuadores(object):
+
+    def __init__ (self):
+        pass
+
+    def vmf_jogador(self):
+        global mão_do_jogador, vm_jogador, família, números, verif
+        vm_jogador=0
+        if 'Ás' == mão_do_jogador[0][0] and '%s' %(família) == mão_do_jogador[1][0]:
+            vm_jogador+=21
+            verif+=1
+        else:
+            for c in mão_do_jogador:
+                c_split=c.split(' ')
+                if c_split[0] in família:
+                    vm_jogador+=10
+                elif c_split[0] in números:
+                    vm_jogador+=(números.index(c_split[0]))+1
+        
+    def vmf_dealer(self):
+        global mão_do_dealer, vm_dealer, família, números
+        vm_dealer=0
+        if 'Ás' == mão_do_dealer[0][0] and '%s' %(família) == mão_do_dealer[1][0]:
+            vm_dealer+=21
+            verif+=1
+        else:
+            for c in mão_do_dealer:
+                c_split=c.split(' ')
+                if c_split[0] in família:
+                    vm_dealer+=10
+                elif c_split[0] in números:
+                    vm_dealer+=(números.index(c_split[0]))+1
+            
+
+# condições de vitória e derrota:
+
+class Condições(object):
+    
+    def __init__(self):
+        pass
+
+    def cond1(self):
+        global vm_jogador
+        global aposta
+        global verif
+        if vm_jogador == 21 and len(mão_do_jogador) == 2:
+            print('BlackJack!!')
+            dinheiro+=2*aposta
+            aposta=0
+            verif+=1
+        elif vm_jogador > 21:
+            print('\n Você perdeu! Sua mão não pode passar de 21 pontos.')
+            aposta=0
+            verif+=1
+
+    def cond2(self):
+        global vm_dealer
+        global vm_jogador
+        global aposta
+        global dinheiro
+        global verif
+        if vm_dealer > 21:
+            print('\n Você venceu! A mão do dealer passou de 21 pontos.')
+            dinheiro+=2*aposta
+            aposta=0
+            verif+=1
+        else:
+            if vm_jogador < vm_dealer and vm_dealer <= 21:
+                print('\n Você perdeu! A mão do dealer alcançou um valor maior sem estourar.')
+                aposta=0
+                verif+=1
+            elif vm_jogador > vm_dealer:
+                print('\n Você venceu! Conseguiu derrotar a mão do dealer.')
+                dinheiro+=2*aposta
+                aposta=0
+                verif+=1
     
 
-iniciar()
-baralho1=Baralho()
-dealer=Dealer()
-jogadas=Jogadas()
+# comando para iniciar e continuar o jogo:
+
+def jogar():
+    global verif
+    ci.apostar()
+    verif=0
+    d.entregar()
+    while verif==0:
+        j.jogador()
+        if verif == 1:
+            break
+        j.dealer()
+        if verif == 1:
+            break
+        c.cond2()
+
+def continuar():
+    global l, mão_do_jogador, mão_do_dealer, dinheiro, baralho, b
+    del b
+    continuar=str(input('\n (Você quer jogar mais uma mão? Responda com "s" ou "n")'))
+    if dinheiro <= 0:
+        print('\n \n GAME OVER!!! Você não tem mais dinheiro para apostar muahahaha perdeu tudo \n')
+        l+=1
+    else:
+        if continuar =='s':
+            mão_do_dealer=[]
+            mão_do_jogador=[]
+            b=Baralho()
+        if continuar == 'n':
+            j.credito_e_aposta()
+            l+=1
+
+# o jogo em si!!:
+
+ci=Config_iniciais()
+c=Condições()
+b=Baralho()
+d=Dealer()
+p=Pontuadores()
+j=Jogadas()
+while l<1:
+        jogar()
+        continuar()
