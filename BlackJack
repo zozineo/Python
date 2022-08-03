@@ -1,6 +1,5 @@
-"""
-Projeto 2: Criar um BlackJack
-"""
+""" Projeto 2: Criar um BlackJack """
+
 import random
 import time
 
