@@ -1,0 +1,10 @@
+import pyautogui as pag
+import time
+
+pag.press("win")
+time.sleep(1)
+pag.write("navegador")
+pag.press("enter")
+time.sleep(2)
+pag.write("https://github.com/zozineo")
+pag.press("enter")
